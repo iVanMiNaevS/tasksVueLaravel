@@ -23,5 +23,5 @@ Route::delete("/tasks/{task}/access", [TasksController::class, "deleteUsers"])->
 Route::get("/tasks/disk", [TasksController::class, "disk"])->middleware('auth:sanctum');
 Route::get("/tasks/shared", [TasksController::class, "shared"])->middleware('auth:sanctum');
 Route::get("/tasks/{id}", [TasksController::class, "getOne"])->middleware('auth:sanctum');
-Route::delete("/tasks/{id}", [TasksController::class, "delete"])->middleware('auth:sanctum');
+Route::delete("/tasks/{task}", [TasksController::class, "delete"])->middleware('auth:sanctum');
 Route::patch("/tasks/{id}", [TasksController::class, "update"])->middleware('auth:sanctum');

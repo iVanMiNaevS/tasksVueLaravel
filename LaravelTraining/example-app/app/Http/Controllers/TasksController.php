@@ -6,13 +6,14 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-function makeResponse($task, $user){
-    $arrayUsers = $task->users()->select("users.id",'users.email')->get()->makeHidden(['pivot']);
+function makeResponse($task, $user)
+{
+    $arrayUsers = $task->users()->select("users.id", 'users.email')->get()->makeHidden(['pivot']);
 
-    $authorId = $task->created_by;  
+    $authorId = $task->created_by;
 
     // Добавляем поле `type` для каждого пользователя
-    $usersWithType = $arrayUsers->map(function($user) use ($authorId) {
+    $usersWithType = $arrayUsers->map(function ($user) use ($authorId) {
         $user->type = ($user->id == $authorId) ? 'author' : 'user';
         return $user;
     });
@@ -49,19 +50,21 @@ class TasksController extends Controller
         $task->update(["title" => $validateData["title"]]);
         return response()->json(["message" => $task]);
     }
-    public function getOne(string $id){
+    public function getOne(string $id)
+    {
         $task = Task::find($id);
         return response()->json([
-            'message'=>$task
+            'message' => $task
         ]);
     }
 
-    public function addUsers(Request $request,Task $task){
+    public function addUsers(Request $request, Task $task)
+    {
         $validData = $request->validate([
-            "email"=> "string|required|email"
+            "email" => "string|required|email"
         ]);
         $user = User::where("email", $validData["email"])->first();
-        
+
 
         if (!$task) {
             return response()->json(['message' => 'Task not found'], 404);
@@ -72,55 +75,59 @@ class TasksController extends Controller
 
                 $task->users()->attach($user->id);
 
-                
+
                 return response()->json(['message' => makeResponse($task, $user)]);
-            }else{
+            } else {
                 return response()->json(['message' => 'This User is alredy added']);
             }
-
         }
 
         return response()->json(['message' => 'Not your tasks'], 403);
     }
 
-    public function disk(Request $request){
-            return response()->json(["message"=>$request->user()->createdTasks()->select("title", "tasks.id", "description")->get()->toArray()]);
+    public function disk(Request $request)
+    {
+        return response()->json(["message" => $request->user()->createdTasks()->select("title", "tasks.id", "description")->get()->toArray()]);
     }
 
-    public function shared(Request $request){
-        return response()->json(["message"=>$request->user()->accessibleTasks()->select("title", "tasks.id", "description")->get()->toArray()]);
+    public function shared(Request $request)
+    {
+        return response()->json(["message" => $request->user()->accessibleTasks()->select("title", "tasks.id", "description")->get()->toArray()]);
     }
 
-    public function deleteUsers(Request $request,Task $task){
+    public function deleteUsers(Request $request, Task $task)
+    {
         $validData = $request->validate([
-            "email"=> "string|required|email"
+            "email" => "string|required|email"
         ]);
 
-        if($request->user()->email === $validData["email"]){
-            return response()->json(["message"=>"You try delete yourself"]);
+        if ($request->user()->email === $validData["email"]) {
+            return response()->json(["message" => "You try delete yourself"]);
         }
 
         $user = User::where("email", $validData["email"])->first();
 
         if ($request->user()->id === $task->creator->id) {
 
-            
+
             $task->users()->detach($user->id);
 
-            
+
             return response()->json(['message' => makeResponse($task, $user)]);
         }
-
-    } 
-    public function delete(string $id)
+    }
+    public function delete(Task $task, Request $request)
     {
-        $task->users()->detach();
+        if ($request->user()->id === $task->creator->id) {
 
-        // Удаляем сам task
-        $task->delete();
+            $task->users()->detach();
 
-        return response()->json([
-            'message' => 'Task удалена успешно!'
-        ]);
+            // Удаляем сам task
+            $task->delete();
+
+            return response()->json([
+                'message' => 'Task удалена успешно!'
+            ]);
+        }
     }
 }
