@@ -58,21 +58,13 @@ async function deleteTask(id) {
 					<div class="col text-muted">{{ task.id }}</div>
 					<div class="col d-flex justify-content-end">
 						<div class="btn-group">
-							<button type="button" class="btn btn-light">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-									width="16" height="16">
-									<path fill-rule="evenodd"
-										d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z"
-										clip-rule="evenodd" />
-								</svg>
-							</button>
 							<button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split"
 								data-bs-toggle="dropdown" aria-expanded="false">
 								<span class="visually-hidden">Toggle Dropdown</span>
 							</button>
 							<ul class="dropdown-menu">
 								<li>
-									<router-link :to={{  "/edit" + task.id}}
+									<router-link :to='"/edit/" + task.id'
 										class="dropdown-item align-items-center d-flex gap-2" href="./files-edit.html">
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
 											width="16" height="16">
@@ -82,13 +74,14 @@ async function deleteTask(id) {
 										Редактировать</router-link>
 								</li>
 								<li>
-									<a class="dropdown-item align-items-center d-flex gap-2" href="./files-access.html">
+									<router-link class="dropdown-item align-items-center d-flex gap-2"
+										:to="'/task/' + task.id + '/access'">
 										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
 											width="16" height="16">
 											<path
 												d="M8.5 4.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10 13c.552 0 1.01-.452.9-.994a5.002 5.002 0 0 0-9.802 0c-.109.542.35.994.902.994h8ZM12.5 3.5a.75.75 0 0 1 .75.75v1h1a.75.75 0 0 1 0 1.5h-1v1a.75.75 0 0 1-1.5 0v-1h-1a.75.75 0 0 1 0-1.5h1v-1a.75.75 0 0 1 .75-.75Z" />
 										</svg>
-										Права доступа</a>
+										Права доступа</router-link>
 								</li>
 								<li>
 									<hr class="dropdown-divider" />

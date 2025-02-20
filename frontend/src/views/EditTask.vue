@@ -2,8 +2,8 @@
     <div class="p-5 w-100 overflow-y-auto overflow-y-auto">
         <h3 class="mb-4">Редактирование файла</h3>
         <div>
-          <h4 class="mb-3">Файл "id"</h4>
-          <form class="needs-validation" novalidate="">
+          <h4 class="mb-3">Task "id"</h4>
+          <form class="needs-validation" novalidate="" @submit.prevent='updateTask'>
             <div class="row g-3 mb-4">
               <div class="col-sm-6">
                 <label for="fileName" class="form-label">Название</label>
@@ -19,11 +19,11 @@
                 <div class="invalid-feedback">Valid file name is required.</div>
               </div>
               <div class="col-sm-6 d-flex align-items-end">
-                <button class="btn btn-primary" type="submit">Сохранить</button>
+                <button class="btn btn-primary"  type="submit">Сохранить</button>
               </div>
             </div>
           </form>
-          <a class="d-flex align-items-center gap-1" href="./files-list.html"
+          <router-link class="d-flex align-items-center gap-1 width: fit-content" to="/"
             ><svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
@@ -37,51 +37,65 @@
                 clip-rule="evenodd"
               />
             </svg>
-            Назад</a
+            Назад</router-link
           >
         </div>
       </div>
 </template>
 <script setup>
+import API from '@/config';
+import { onMounted } from 'vue';
 import { ref } from 'vue';
-
+import { useRoute, useRouter } from 'vue-router';
 let fileName = ref('')
 
+const route = useRoute();
+const router = useRouter();
+
+const { id } = route.params;
+
+
 async function fethTasks() {
-    const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token")
 
-    if (token) {
-        const response = await fetch(`${API}/tasks/disk`, {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        })
+  if (token) {
+    const response = await fetch(`${API}/tasks/disk`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
 
-        if (response.ok) {
-            const data = await response.json();
-            return data
-        }
-    } else {
-        alert("Unauthorized")
+    if (response.ok) {
+      const data = await response.json();
+      return data
     }
+  } else {
+    alert("Unauthorized")
+  }
 }
 
-fethTasks().then(data => { data.filter() })
+fethTasks().then(data => {
+  fileName.value = data.message.find((task) => { return task.id == id }).title;
+})
 
-async function updateTask(id) {
-    const token = localStorage.getItem("token")
-    if (token) {
 
-        const response = await fetch(`${API}/tasks/${id}`, {
-            method: "Patch", headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        })
-        if (response.ok) {
-            const data = await response.json()
+async function updateTask() {
+  const token = localStorage.getItem("token")
+  if (token) {
 
-        }
+    const response = await fetch(`${API}/tasks/${id}`, {
+      method: "PATCH", headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }, body: JSON.stringify({
+        "title": fileName.value
+      })
+    })
+    if (response.ok) {
+      const data = await response.json()
+      router.push("/")
     }
+  }
 }
 
 </script>
