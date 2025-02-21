@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 function makeResponse($task, $user)
 {
-    $arrayUsers = $task->users()->select("users.id", 'users.email')->get()->makeHidden(['pivot']);
+    $arrayUsers = $task->users()->select("users.id", 'users.email', 'users.first_name')->get()->makeHidden(['pivot']);
 
     $authorId = $task->created_by;
 
@@ -60,11 +61,16 @@ class TasksController extends Controller
 
     public function addUsers(Request $request, Task $task)
     {
+
         $validData = $request->validate([
             "email" => "string|required|email"
         ]);
-        $user = User::where("email", $validData["email"])->first();
-
+        try {
+            $user = User::where("email", $validData["email"])->firstOrFail();
+            // Do something with $task
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
 
         if (!$task) {
             return response()->json(['message' => 'Task not found'], 404);
@@ -78,7 +84,7 @@ class TasksController extends Controller
 
                 return response()->json(['message' => makeResponse($task, $user)]);
             } else {
-                return response()->json(['message' => 'This User is alredy added']);
+                return response()->json(['message' => 'This User is alredy added'], 400);
             }
         }
 
@@ -115,6 +121,10 @@ class TasksController extends Controller
 
             return response()->json(['message' => makeResponse($task, $user)]);
         }
+    }
+    public function getUsers(Request $request, Task $task)
+    {
+        return response()->json(['message' => makeResponse($task, $request->user())]);
     }
     public function delete(Task $task, Request $request)
     {

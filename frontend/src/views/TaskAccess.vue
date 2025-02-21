@@ -3,7 +3,7 @@
         <h3 class="mb-4">Права доступа</h3>
         <div>
           <h4 class="mb-3">Предоставить доступ к task "id"</h4>
-          <form class="needs-validation mb-4" novalidate="">
+          <form class="needs-validation mb-4" novalidate="" @submit.prevent="addUser">
             <div class="row g-3 mb-3">
               <div class="col-sm-6">
                 <label for="email" class="form-label">Email пользователя</label>
@@ -24,7 +24,7 @@
           </form>
           <h4 class="mb-3">Пользователи, имеющие доступ</h4>
           <ul class="list-group mb-4">
-            <li v-for="user in users" class="list-group-item align-items-center d-flex gap-3 py-3">
+            <li v-for="user in users" :key="user.id" class="list-group-item align-items-center d-flex gap-3 py-3">
               <div
                 class="bg-success text-white d-flex justify-content-center align-items-center rounded-3 flex-shrink-0"
                 style="width: 40px; height: 40px"
@@ -44,10 +44,10 @@
               <div
                 class="row w-100 align-items-center justify-content-betweeen"
               >
-                <div class="col fw-bold">User Userov</div>
-                <div class="col text-muted">example@user.com</div>
+                <div class="col fw-bold">{{user.first_name}}</div>
+                <div class="col text-muted">{{user.email}}</div>
                 <div class="col d-flex justify-content-end">
-                  <button class="btn btn-danger" type="button">Отозвать</button>
+                  <button class="btn btn-danger" type="button" @click="deleteUser">Отозвать</button>
                 </div>
               </div>
             </li>
@@ -71,34 +71,89 @@
         </div>
       </div>
 </template>
-<script>
+<script setup>
 import API from '@/config';
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
+const { id } = route.params;
 
-let list = ref([])
-let email = ref([])
+let users = ref([])
+let email = ref("")
 
-// async function fethTasks() {
-//     const token = localStorage.getItem("token")
+async function addUser() {
+  const token = localStorage.getItem("token")
 
-//     if (token) {
-//         const response = await fetch(`${API}/tasks/shared`, {
-//             headers: {
-//                 "Authorization": `Bearer ${token}`
-//             }
-//         })
+  if (token) {
+    const response = await fetch(`${API}/tasks/${id}/access`, {
+      method: "POST",
+      body: JSON.stringify({
+        email: email.value
+      }),
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    })
 
-//         if (response.ok) {
-//             const data = await response.json();
-//             list.value = data.message
-//         }
-//     } else {
-//         alert("Unauthorized")
-//     }
-// }
+    if (response.ok) {
+      const data = await response.json();
+      users.value = data.message.filter((user) => user.type !== "author")
+      console.log(users.value)
+    }
+  } else {
+    alert("Unauthorized")
+  }
+}
 
-// fethTasks()
+async function deleteUser() {
+  const token = localStorage.getItem("token")
+
+  if (token) {
+    const response = await fetch(`${API}/tasks/${id}/access`, {
+      method: "DELETE",
+      body: JSON.stringify({
+        email: email.value
+      }),
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    })
+
+    if (response.ok) {
+      const data = await response.json();
+      users.value = data.message.filter((user) => user.type !== "author")
+      console.log(users.value)
+    } else {
+      const data = await response.json();
+      alert(data.message)
+    }
+  } else {
+    alert("Unauthorized")
+  }
+}
+async function fetchUser() {
+  const token = localStorage.getItem("token")
+
+  if (token) {
+    const response = await fetch(`${API}/tasks/${id}/access`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+
+    if (response.ok) {
+      const data = await response.json();
+      users.value = data.message.filter((user) => user.type !== "author")
+    }
+  } else {
+    alert("Unauthorized")
+  }
+}
+
+fetchUser()
 
 
 </script>

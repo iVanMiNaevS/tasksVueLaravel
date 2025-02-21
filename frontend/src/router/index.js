@@ -50,11 +50,14 @@ const router = createRouter({
 	],
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to, from) => {
 	const isAuthenticated = !!localStorage.getItem("token");
 
 	if (!isAuthenticated && to.name !== "login" && to.name !== "reg") {
 		return { name: "login" };
+	}
+	if (isAuthenticated && (to.name == "login" || to.name == "reg")) {
+		return from;
 	}
 });
 

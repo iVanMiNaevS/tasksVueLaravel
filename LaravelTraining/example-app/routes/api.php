@@ -19,6 +19,7 @@ Route::post("/logout", [AuthController::class, "logout"])->middleware('auth:sanc
 
 Route::post("/tasks", [TasksController::class, "add"])->middleware('auth:sanctum');
 Route::post("/tasks/{task}/access", [TasksController::class, "addUsers"])->middleware('auth:sanctum');
+Route::get("/tasks/{task}/access", [TasksController::class, "getUsers"])->middleware('auth:sanctum');
 Route::delete("/tasks/{task}/access", [TasksController::class, "deleteUsers"])->middleware('auth:sanctum');
 Route::get("/tasks/disk", [TasksController::class, "disk"])->middleware('auth:sanctum');
 Route::get("/tasks/shared", [TasksController::class, "shared"])->middleware('auth:sanctum');
